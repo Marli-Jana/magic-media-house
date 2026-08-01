@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Jana's Hub">
+  <meta name="theme-color" content="#ff78b5">
+  <title>Jana's Magic Media House</title>
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="icon" href="assets/icon-192.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app" class="app-shell">
+    <div class="sky-shape sky-one"></div>
+    <div class="sky-shape sky-two"></div>
+    <div class="sparkle sparkle-a">✦</div>
+    <div class="sparkle sparkle-b">✧</div>
+    <div class="sparkle sparkle-c">✦</div>
+
+    <header class="topbar">
+      <div class="title-block">
+        <div id="greeting" class="greeting">Hello, Jana!</div>
+        <h1>Jana's Magic Media House</h1>
+        <div class="subtitle">Choose a happy adventure</div>
+      </div>
+      <button id="parentTrigger" class="grownup-heart" aria-label="Grown-up controls" title="Grown-up controls">♥</button>
+    </header>
+
+    <main class="home-grid" aria-label="Jana's activities">
+      <button class="activity-card theatre-card" data-open="theatre">
+        <div class="card-glow"></div>
+        <div class="theatre-art" aria-hidden="true">
+          <div class="castle">
+            <div class="tower tower-left"><span></span></div>
+            <div class="tower tower-main"><span></span></div>
+            <div class="tower tower-right"><span></span></div>
+            <div class="castle-door">★</div>
+          </div>
+          <div class="play-bubble">▶</div>
+        </div>
+        <div class="card-copy">
+          <span class="eyebrow">Marli's approved videos</span>
+          <strong>Barbie Doll Theatre</strong>
+          <span>Only the videos Mum chooses</span>
+        </div>
+      </button>
+
+      <button class="activity-card dress-card" data-open="dressup">
+        <div class="tile-icon">👗</div>
+        <strong>Dress-Up Studio</strong>
+        <span>Mix colours and sparkles</span>
+      </button>
+
+      <button class="activity-card story-card" data-open="stories">
+        <div class="tile-icon">📖</div>
+        <strong>Story Sparkles</strong>
+        <span>Make a magical tale</span>
+      </button>
+
+      <button class="activity-card colour-card" data-open="colour">
+        <div class="tile-icon">🎨</div>
+        <strong>Colour Garden</strong>
+        <span>Draw with your finger</span>
+      </button>
+
+      <button class="activity-card dance-card" data-open="dance">
+        <div class="tile-icon">💃</div>
+        <strong>Dance & Freeze</strong>
+        <span>Move, giggle, freeze!</span>
+      </button>
+
+      <button class="activity-card calm-card" data-open="calm">
+        <div class="tile-icon">☁️</div>
+        <strong>Quiet Cloud</strong>
+        <span>Five slow magic breaths</span>
+      </button>
+    </main>
+
+    <footer class="footer-strip">
+      <div class="footer-star">★</div>
+      <div id="kindMessage">You make today sparkle.</div>
+      <div class="footer-star">★</div>
+    </footer>
+  </div>
+
+  <div id="modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-panel">
+      <button id="closeModal" class="close-button" aria-label="Close">×</button>
+      <div id="modalContent" class="modal-content"></div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden" role="status"></div>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
