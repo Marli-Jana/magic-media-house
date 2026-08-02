@@ -11,6 +11,9 @@
   var danceTimer = null;
   var breathTimer = null;
   var currentSpeech = null;
+  var youtubePlayer = null;
+  var youtubeApiLoading = false;
+  var youtubeApiCallbacks = [];
 
   function escapeHtml(value) {
     return String(value || '')
@@ -72,16 +75,60 @@
 
   function closeModal() {
     stopActiveActivities();
+    modal.classList.remove('video-big-view');
     modal.classList.add('hidden');
     modalContent.className = 'modal-content';
     modalContent.innerHTML = '';
   }
 
+  function destroyYouTubePlayer() {
+    if (youtubePlayer && typeof youtubePlayer.destroy === 'function') {
+      try { youtubePlayer.destroy(); } catch (e) {}
+    }
+    youtubePlayer = null;
+  }
+
   function stopActiveActivities() {
+    destroyYouTubePlayer();
+    modal.classList.remove('video-big-view');
     if (danceTimer) { clearInterval(danceTimer); danceTimer = null; }
     if (breathTimer) { clearTimeout(breathTimer); breathTimer = null; }
     if (window.speechSynthesis) { window.speechSynthesis.cancel(); }
     currentSpeech = null;
+  }
+
+  function ensureYouTubeApi(callback) {
+    if (window.YT && window.YT.Player) {
+      callback();
+      return;
+    }
+
+    youtubeApiCallbacks.push(callback);
+    if (youtubeApiLoading) { return; }
+    youtubeApiLoading = true;
+
+    var previousReady = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = function () {
+      youtubeApiLoading = false;
+      if (typeof previousReady === 'function') {
+        try { previousReady(); } catch (e) {}
+      }
+      var callbacks = youtubeApiCallbacks.slice(0);
+      youtubeApiCallbacks = [];
+      for (var i = 0; i < callbacks.length; i++) {
+        try { callbacks[i](); } catch (e) {}
+      }
+    };
+
+    var script = document.createElement('script');
+    script.id = 'youtubeIframeApi';
+    script.src = 'https://www.youtube.com/iframe_api';
+    script.onerror = function () {
+      youtubeApiLoading = false;
+      youtubeApiCallbacks = [];
+      showToast('The video controls could not load. Check Wi-Fi and try again.');
+    };
+    document.head.appendChild(script);
   }
 
   closeModalButton.addEventListener('click', closeModal);
@@ -149,14 +196,84 @@
   }
 
   function playVideo(id, title) {
-    var safeId = escapeHtml(id);
+    var safeId = String(id || '').replace(/[^A-Za-z0-9_-]/g, '');
+    destroyYouTubePlayer();
+    modal.classList.remove('video-big-view');
     modalContent.className = 'modal-content video-mode';
-    modalContent.innerHTML = '<button id="backToShelf" class="video-back-button" type="button">&#8249; Videos</button>' +
-      '<div class="video-player-wrap">' +
-      '<iframe class="video-frame" title="' + escapeHtml(title) + '" ' +
-      'src="https://www.youtube-nocookie.com/embed/' + safeId + '?rel=0&playsinline=1&autoplay=1&controls=1&fs=1" ' +
-      'allow="autoplay; encrypted-media" allowfullscreen webkitallowfullscreen></iframe></div>';
+    modalContent.innerHTML =
+      '<button id="backToShelf" class="video-back-button" type="button">&#8249; Videos</button>' +
+      '<div class="video-title">' + escapeHtml(title || 'Barbie video') + '</div>' +
+      '<div class="video-player-stage">' +
+        '<div id="youtubePlayer" class="youtube-player-host"><div class="video-loading">Loading the magic screen…</div></div>' +
+      '</div>' +
+      '<div class="video-control-bar">' +
+        '<button id="videoPlay" class="video-control primary" type="button" disabled>▶ Play</button>' +
+        '<button id="videoPause" class="video-control" type="button" disabled>Ⅱ Pause</button>' +
+        '<button id="videoBack10" class="video-control small-control" type="button" disabled>↶ 10s</button>' +
+        '<button id="videoForward10" class="video-control small-control" type="button" disabled>10s ↷</button>' +
+        '<button id="videoBigView" class="video-control big-view-control" type="button">⛶ Big Screen</button>' +
+      '</div>';
+
     document.getElementById('backToShelf').addEventListener('click', showTheatre);
+    document.getElementById('videoBigView').addEventListener('click', function () {
+      modal.classList.toggle('video-big-view');
+      this.textContent = modal.classList.contains('video-big-view') ? '↙ Normal View' : '⛶ Big Screen';
+    });
+
+    ensureYouTubeApi(function () {
+      var host = document.getElementById('youtubePlayer');
+      if (!host) { return; }
+      youtubePlayer = new window.YT.Player('youtubePlayer', {
+        width: '100%',
+        height: '100%',
+        videoId: safeId,
+        playerVars: {
+          autoplay: 0,
+          controls: 0,
+          disablekb: 1,
+          fs: 0,
+          playsinline: 1,
+          rel: 0,
+          modestbranding: 1
+        },
+        events: {
+          onReady: function () {
+            enableVideoControls();
+          },
+          onError: function () {
+            showToast('That YouTube video could not be played.');
+          }
+        }
+      });
+    });
+  }
+
+  function enableVideoControls() {
+    var playButton = document.getElementById('videoPlay');
+    var pauseButton = document.getElementById('videoPause');
+    var backButton = document.getElementById('videoBack10');
+    var forwardButton = document.getElementById('videoForward10');
+    if (!playButton || !youtubePlayer) { return; }
+
+    playButton.disabled = false;
+    pauseButton.disabled = false;
+    backButton.disabled = false;
+    forwardButton.disabled = false;
+
+    playButton.addEventListener('click', function () {
+      if (youtubePlayer && youtubePlayer.playVideo) { youtubePlayer.playVideo(); }
+    });
+    pauseButton.addEventListener('click', function () {
+      if (youtubePlayer && youtubePlayer.pauseVideo) { youtubePlayer.pauseVideo(); }
+    });
+    backButton.addEventListener('click', function () {
+      if (!youtubePlayer || !youtubePlayer.getCurrentTime || !youtubePlayer.seekTo) { return; }
+      youtubePlayer.seekTo(Math.max(0, youtubePlayer.getCurrentTime() - 10), true);
+    });
+    forwardButton.addEventListener('click', function () {
+      if (!youtubePlayer || !youtubePlayer.getCurrentTime || !youtubePlayer.seekTo) { return; }
+      youtubePlayer.seekTo(youtubePlayer.getCurrentTime() + 10, true);
+    });
   }
 
   function showDressup() {

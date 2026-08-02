@@ -1,4 +1,4 @@
-var CACHE_NAME = 'jana-magic-house-v3';
+var CACHE_NAME = 'jana-magic-house-v4';
 var OFFLINE_FILES = [
   './', './index.html', './styles.css', './app.js', './config.js', './manifest.webmanifest',
   './assets/apple-touch-icon.png', './assets/icon-192.png', './assets/icon-512.png'
