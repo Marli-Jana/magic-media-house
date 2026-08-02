@@ -65,6 +65,7 @@
 
   function openModal(html) {
     stopActiveActivities();
+    modalContent.className = 'modal-content';
     modalContent.innerHTML = html;
     modal.classList.remove('hidden');
   }
@@ -72,6 +73,7 @@
   function closeModal() {
     stopActiveActivities();
     modal.classList.add('hidden');
+    modalContent.className = 'modal-content';
     modalContent.innerHTML = '';
   }
 
@@ -148,11 +150,13 @@
 
   function playVideo(id, title) {
     var safeId = escapeHtml(id);
-    modalContent.innerHTML = '<div class="video-player-wrap">' +
+    modalContent.className = 'modal-content video-mode';
+    modalContent.innerHTML = '<button id="backToShelf" class="video-back-button" type="button">&#8249; Videos</button>' +
+      '<div class="video-player-wrap">' +
       '<iframe class="video-frame" title="' + escapeHtml(title) + '" ' +
-      'src="https://www.youtube-nocookie.com/embed/' + safeId + '?rel=0&playsinline=1&autoplay=1" ' +
-      'allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen ' +
-      'sandbox="allow-scripts allow-same-origin allow-presentation"></iframe></div>';
+      'src="https://www.youtube-nocookie.com/embed/' + safeId + '?rel=0&playsinline=1&autoplay=1&controls=1&fs=1" ' +
+      'allow="autoplay; encrypted-media" allowfullscreen webkitallowfullscreen></iframe></div>';
+    document.getElementById('backToShelf').addEventListener('click', showTheatre);
   }
 
   function showDressup() {
